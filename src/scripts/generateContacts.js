@@ -1,21 +1,14 @@
-import { PATH_DB } from '../constants/contacts.js';
-import fs from 'node:fs/promises';
 import { createFakeContact } from '../utils/createFakeContact.js';
-import { faker } from '@faker-js/faker';
+import { readContacts } from '../utils/readContacts.js';
+import { writeContacts } from '../utils/writeContacts.js';
 
 const generateContacts = async (number) => {
-  const newData = faker.helpers.multiple(createFakeContact, { count: number });
-  try {
-    const existingDataPromises = await fs.readFile(PATH_DB, 'utf8');
-    const existingData = JSON.parse(existingDataPromises);
+  const newData = Array(number).fill(0).map(createFakeContact);
+  const existingData = await readContacts();
 
-    const updatingContacts = JSON.stringify([...existingData, ...newData]);
+  const updatingContacts = [...existingData, ...newData];
 
-    const response = await fs.writeFile(PATH_DB, updatingContacts, 'utf8');
-    return response;
-  } catch (error) {
-    return error.message;
-  }
+  await writeContacts(updatingContacts);
 };
 
 generateContacts(5);
